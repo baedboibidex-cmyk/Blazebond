@@ -2,12 +2,39 @@
 <html>
 <head>
   <title>Bondly</title>
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ff4b6e">
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Firebase SDKs (MUST be first) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 </head>
 <body>
-  <h1>Bondly is Live</h1>
+
+  <div class="container">
+    <h1>Bondly 💖</h1>
+    <p>Find love anywhere in the world</p>
+
+    <input type="text" id="username" placeholder="Username">
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+
+    <button onclick="signup()">Create Account</button>
+
+    <p onclick="login()" style="cursor:pointer;">
+      Already have an account? Login
+    </p>
+  </div>
+
+  <!-- Firebase Config -->
+  <script src="firebase.js"></script>
+
+  <!-- Bondly App Logic -->
+  <script src="script.js"></script>
+
 </body>
 </html>
-
-
-
 

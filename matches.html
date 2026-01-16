@@ -1,0 +1,98 @@
+<script src="firebase.js"></script>
+<script>
+const db = firebase.firestore();
+let user = null;
+let matches = [];
+let current = 0;
+
+// AUTH + 18+ CHECK
+firebase.auth().onAuthStateChanged(async u => {
+  if(!u){
+    window.location.href = "index.html";
+    return;
+  }
+
+  user = u;
+
+  // 🔞 CHECK AGE VERIFICATION
+  const userDoc = await db.collection("users").doc(user.uid).get();
+  if(!userDoc.exists || userDoc.data().is18Verified !== true){
+    window.location.href = "verify18.html";
+    return;
+  }
+
+  // LOAD MATCHES
+  const snapshot = await db.collection("users").get();
+  snapshot.forEach(doc => {
+    if(doc.id !== user.uid){
+      matches.push({ id: doc.id, ...doc.data() });
+    }
+  });
+
+  showMatch();
+});
+
+// SHOW CURRENT MATCH
+function showMatch(){
+  if(matches.length === 0){
+    document.getElementById("card").innerHTML = "<p>No users available 😢</p>";
+    return;
+  }
+
+  const m = matches[current];
+  document.getElementById("match-name").innerText = m.username || "Unknown";
+  document.getElementById("match-age").innerText = m.age ? m.age + " years old" : "";
+  document.getElementById("match-img").src = m.img || "https://i.pravatar.cc/300";
+}
+
+// NEXT MATCH
+function nextMatch(){
+  if(matches.length === 0) return;
+  current = (current + 1) % matches.length;
+  showMatch();
+}
+
+// LIKE MATCH
+function likeMatch(){
+  if(matches.length === 0) return;
+
+  const likedUser = matches[current];
+
+  db.collection("users")
+    .doc(user.uid)
+    .collection("likes")
+    .doc(likedUser.id)
+    .set({ liked: true })
+    .then(async () => {
+
+      const mutual = await db.collection("users")
+        .doc(likedUser.id)
+        .collection("likes")
+        .doc(user.uid)
+        .get();
+
+      if(mutual.exists){
+        alert(`🎉 You matched with ${likedUser.username}!`);
+
+        const chatId =
+          user.uid < likedUser.id
+            ? user.uid + "_" + likedUser.id
+            : likedUser.id + "_" + user.uid;
+
+        await db.collection("chats").doc(chatId).set({
+          participants: [user.uid, likedUser.id],
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }
+
+      nextMatch();
+    });
+}
+
+// LOGOUT
+function logout(){
+  firebase.auth().signOut().then(() => {
+    window.location.href = "index.html";
+  });
+}
+</script>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Verify Age 🔞</title>
+</head>
+<body>
+
+<h2>Age Verification</h2>
+<p>You must be 18+ to continue</p>
+
+<button onclick="verify()">I am 18 or older</button>
+
+<script src="firebase.js"></script>
+<script>
+const db = firebase.firestore();
+
+function verify(){
+  const user = firebase.auth().currentUser;
+  if(!user) return;
+
+  db.collection("users").doc(user.uid).update({
+    is18Verified: true
+  }).then(() => {
+    window.location.href = "matches.html";
+  });
+}
+</script>
+
+</body>
+</html>

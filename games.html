@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bondly Games 🔥</title>
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+  <style>
+    #game-area { display: none; margin-top: 20px; }
+    #question { font-size: 18px; margin-bottom: 15px; }
+    button { padding: 10px 15px; border-radius: 10px; border: none; cursor: pointer; margin-right: 10px; }
+    #next-btn { background: #ff4b6e; color: white; }
+    #back-btn { background: gray; color: white; }
+    #status { font-weight: bold; margin-top: 15px; }
+  </style>
+</head>
+<body>
+
+<h2>Spicy Games 🔥</h2>
+<div id="status">Checking access...</div>
+
+<div id="game-area">
+  <div id="question"></div>
+  <button id="next-btn" onclick="nextQuestion()">Next</button>
+  <button id="back-btn" onclick="goBack()">Back</button>
+</div>
+
+<script src="firebase.js"></script>
+<script>
+  const db = firebase.firestore();
+  let user = null;
+
+  // 🔞 Age & 💳 Premium check + game start
+  firebase.auth().onAuthStateChanged(async u => {
+    if(!u){
+      window.location.href = "index.html";
+      return;
+    }
+    user = u;
+
+    const doc = await db.collection("users").doc(user.uid).get();
+    const data = doc.data();
+
+    // 🔞 Age verification
+    if(!data.is18Verified){
+      window.location.href = "verify18.html";
+      return;
+    }
+
+    // 💳 Premium check
+    if(!data.isPremium){
+      window.location.href = "premium.html";
+      return;
+    }
+
+    // ✅ Allowed to play
+    document.getElementById("status").innerText = "Let’s play 🔥";
+    document.getElementById("game-area").style.display = "block";
+    showQuestion();
+  });
+
+  // Game questions
+  const questions = [
+    "Truth: What’s something most people don’t know about you?",
+    "Dare: Send a compliment to your match 💖",
+    "Truth: What do you find attractive in a person?",
+    "Dare: Change your profile bio for 5 minutes 😏"
+  ];
+  let current = 0;
+
+  // Show current question
+  function showQuestion(){
+    document.getElementById("question").innerText = questions[current];
+  }
+
+  // Next question
+  function nextQuestion(){
+    current = (current + 1) % questions.length;
+    showQuestion();
+  }
+
+  // Go back to previous question
+  function goBack(){
+    current = (current - 1 + questions.length) % questions.length;
+    showQuestion();
+  }
+</script>
+</body>
+</html>

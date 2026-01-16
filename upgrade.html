@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Upgrade to Premium 💳</title>
+</head>
+<body>
+
+<h2>Premium Access</h2>
+<p>Unlock games & special features</p>
+
+<button onclick="upgrade()">Upgrade (Test)</button>
+
+<script src="firebase.js"></script>
+<script>
+const db = firebase.firestore();
+
+function upgrade(){
+  const user = firebase.auth().currentUser;
+  if(!user) return;
+
+  // 💳 TEST MODE ONLY
+  db.collection("users").doc(user.uid).update({
+    isPremium: true
+  }).then(() => {
+    alert("Premium activated 🎉");
+    window.location.href = "games.html";
+  });
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bondly Premium 💳</title>
+  <link rel="stylesheet" href="style.css">
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+  <style>
+    body { text-align: center; padding: 50px; font-family: Arial, sans-serif; }
+    button { padding: 15px 25px; font-size: 16px; border-radius: 10px; border: none; background: #ff4b6e; color: white; cursor: pointer; }
+    #status { margin-top: 20px; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+<h2>Upgrade to Premium 💳</h2>
+<p>Unlock spicy games, exclusive matches & more!</p>
+
+<button onclick="pay()">Pay with Paystack (Test)</button>
+<div id="status"></div>
+
+<script src="firebase.js"></script>
+<script src="https://js.paystack.co/v1/inline.js"></script>
+<script>
+  const db = firebase.firestore();
+  let user = null;
+
+  // Auth check
+  firebase.auth().onAuthStateChanged(u => {
+    if(!u) window.location.href = "index.html";
+    user = u;
+  });
+
+  function pay(){
+    if(!user) return;
+
+    const handler = PaystackPop.setup({
+      key: 'pk_test_xxxxxxxxxxxxxxxxxxxxx', // Replace with your Paystack test public key
+      email: user.email,
+      amount: 5000, // 50 NGN in kobo
+      currency: "NGN",
+      ref: '' + Math.floor(Math.random() * 1000000000 + 1),
+      callback: function(response){
+        // Payment successful
+        db.collection("users").doc(user.uid).update({
+          isPremium: true
+        }).then(()=>{
+          document.getElementById("status").innerText = "🎉 Payment successful! Premium unlocked.";
+          setTimeout(()=>{ window.location.href="games.html"; }, 1500);
+        });
+      },
+      onClose: function(){
+        alert('Payment cancelled.');
+      }
+    });
+    handler.openIframe();
+  }
+</script>
+
+</body>
+</html>
