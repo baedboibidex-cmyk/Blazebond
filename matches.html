@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bondly Matches</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .card {
+      background: white;
+      color: black;
+      border-radius: 20px;
+      padding: 20px;
+      margin: 20px 0;
+      text-align: center;
+    }
+
+    .card img {
+      width: 100%;
+      border-radius: 20px;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 15px;
+    }
+
+    .buttons button {
+      width: 120px;
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .like {
+      background: #ff4b6e;
+      color: white;
+    }
+
+    .dislike {
+      background: gray;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Meet People 💖</h1>
+
+    <div id="card" class="card">
+      <img id="match-img" src="" alt="Profile">
+      <h2 id="match-name"></h2>
+      <p id="match-age"></p>
+
+      <div class="buttons">
+        <button class="dislike" onclick="nextMatch()">Dislike</button>
+        <button class="like" onclick="nextMatch()">Like</button>
+      </div>
+    </div>
+
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <script>
+    const matches = [
+      {name: "Alice", age: 22, img: "https://i.pravatar.cc/300?img=1"},
+      {name: "Bella", age: 25, img: "https://i.pravatar.cc/300?img=2"},
+      {name: "Cara", age: 24, img: "https://i.pravatar.cc/300?img=3"},
+      {name: "Diana", age: 23, img: "https://i.pravatar.cc/300?img=4"}
+    ];
+
+    let current = 0;
+
+    function showMatch() {
+      document.getElementById("match-name").innerText = matches[current].name;
+      document.getElementById("match-age").innerText = matches[current].age + " years old";
+      document.getElementById("match-img").src = matches[current].img;
+    }
+
+    function nextMatch() {
+      current++;
+      if(current >= matches.length) {
+        alert("No more matches!");
+        current = 0; // restart
+      }
+      showMatch();
+    }
+
+    function logout() {
+      window.location.href = "index.html";
+    }
+
+    showMatch();
+  </script>
+
+</body>
+</html>
