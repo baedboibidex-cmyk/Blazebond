@@ -1,47 +1,31 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Bondly Status 🔥</title>
-  <link rel="stylesheet" href="style.css">
-
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
-
-  <style>
-    #statuses { margin-top:20px; }
-    .status { 
-      padding:10px; 
-      border-bottom:1px solid #eee; 
-      display:flex; 
-      flex-direction:column; 
-      margin-bottom:10px;
-      background:#f9f9f9;
-      border-radius:10px;
-    }
-    .status img { max-width:100%; margin-top:5px; border-radius:10px; }
-    .status button { margin-top:5px; width:60px; border:none; background:#ff4b6e; color:white; border-radius:5px; cursor:pointer; }
-    .spicy { background:#ffd6d6; border-left:5px solid #ff4b6e; padding-left:10px; }
-  </style>
+  <title>Bondly - Status</title>
+  <link rel="manifest" href="https://bondly-312ef.web.app/manifest.json">
+  <link rel="stylesheet" href="https://bondly-312ef.web.app/style.css">
 </head>
 <body>
 
-<h2>Post a Status 🔥</h2>
-<input type="text" id="status-text" placeholder="What's on your mind?">
-<input type="file" id="status-img">
-<label>
-  <input type="checkbox" id="spicy-checkbox"> 🔥 Spicy / Adult (Premium)
-</label>
-<button onclick="postStatus()">Post</button>
+  <div class="container">
+    <h1>Status</h1>
+    <p>See your activity and updates</p>
 
-<h3>Recent Statuses</h3>
-<div id="statuses"></div>
+    <div id="status-info">
+      <!-- Firebase will fill status info here -->
+    </div>
 
-<button onclick="goBack()">Back</button>
+    <div class="nav">
+      <a href="https://bondly-312ef.web.app/index.html">Home</a>
+      <a href="https://bondly-312ef.web.app/profile.html">Profile</a>
+      <a href="https://bondly-312ef.web.app/matches.html">Matches</a>
+    </div>
+  </div>
 
-<script src="firebase.js"></script>
-<script src="status.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="https://bondly-312ef.web.app/firebase.js"></script>
+  <script src="https://bondly-312ef.web.app/script.js"></script>
 </body>
 </html>

@@ -1,120 +1,59 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Bondly Video Call</title>
+  <title>Bondly Chat 💬</title>
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
   <style>
-    video { width: 45%; margin: 5px; border-radius:10px; }
-    #videos { display:flex; justify-content:center; flex-wrap:wrap; }
+    #messages {
+      height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #messages p {
+      margin: 5px 0;
+      padding: 5px 10px;
+      border-radius: 10px;
+      max-width: 80%;
+    }
+
+    .me { background: #ff4b6e; color: white; align-self: flex-end; margin-left: auto; }
+    .other { background: #eee; color: black; align-self: flex-start; margin-right: auto; }
+
+    #chat-container { display: flex; flex-direction: column; width: 90%; max-width: 500px; margin: auto; }
+    input, button { padding: 10px; margin: 5px 0; border-radius: 10px; border: 1px solid #ccc; }
+    button { cursor: pointer; }
   </style>
 </head>
 <body>
 
-<h2>Video Call</h2>
-<button onclick="endCall()">End Call</button>
-<div id="videos">
-  <video id="localVideo" autoplay muted></video>
-  <video id="remoteVideo" autoplay></video>
+<h2 id="chat-with">Loading...</h2>
+<button onclick="logout()" style="margin-bottom:10px;">Logout</button>
+
+<!-- Video Call button -->
+<button onclick="startVideoCall()" style="background:#ff4b6e;color:white;padding:10px;border:none;border-radius:10px;margin-bottom:10px;">
+📹 Video Call
+</button>
+
+<div id="chat-container">
+  <div id="messages"></div>
+  <input type="text" id="msg" placeholder="Type a message">
+  <button onclick="sendMessage()">Send</button>
 </div>
 
 <script src="firebase.js"></script>
-<script>
-const db = firebase.firestore();
-let user = null;
-
-const urlParams = new URLSearchParams(window.location.search);
-const callId = urlParams.get("callId");
-if(!callId){
-  alert("No call ID found!");
-  window.location.href = "chat.html";
-}
-
-let pc = new RTCPeerConnection();
-const localVideo = document.getElementById("localVideo");
-const remoteVideo = document.getElementById("remoteVideo");
-
-// Auth check
-firebase.auth().onAuthStateChanged(async u=>{
-  if(!u) window.location.href="index.html";
-  user = u;
-
-  // Get call doc
-  const callDoc = db.collection("calls").doc(callId);
-  const callData = (await callDoc.get()).data();
-
-  const localStream = await navigator.mediaDevices.getUserMedia({video:true,audio:true});
-  localVideo.srcObject = localStream;
-  localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-
-  // Handle remote stream
-  pc.ontrack = event => {
-    remoteVideo.srcObject = event.streams[0];
-  }
-
-  // Firestore signaling
-  const offerCandidates = callDoc.collection("offerCandidates");
-  const answerCandidates = callDoc.collection("answerCandidates");
-
-  if(user.uid === callData.from){
-    // Caller
-    const offer = await pc.createOffer();
-    await pc.setLocalDescription(offer);
-    await callDoc.update({offer: offer.toJSON()});
-
-    offerCandidates.onSnapshot(snapshot=>{
-      snapshot.docChanges().forEach(change=>{
-        if(change.type==="added"){
-          const candidate = new RTCIceCandidate(change.doc.data());
-          pc.addIceCandidate(candidate);
-        }
-      });
-    });
-
-    callDoc.onSnapshot(async snap=>{
-      const data = snap.data();
-      if(data.answer && !pc.currentRemoteDescription){
-        const answerDesc = new RTCSessionDescription(data.answer);
-        await pc.setRemoteDescription(answerDesc);
-      }
-    });
-  } else {
-    // Receiver
-    callDoc.onSnapshot(async snap=>{
-      const data = snap.data();
-      if(data.offer && !pc.currentRemoteDescription){
-        await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
-        const answer = await pc.createAnswer();
-        await pc.setLocalDescription(answer);
-        await callDoc.update({answer: answer.toJSON()});
-      }
-    });
-
-    answerCandidates.onSnapshot(snapshot=>{
-      snapshot.docChanges().forEach(change=>{
-        if(change.type==="added"){
-          const candidate = new RTCIceCandidate(change.doc.data());
-          pc.addIceCandidate(candidate);
-        }
-      });
-    });
-  }
-
-  pc.onicecandidate = event=>{
-    if(event.candidate){
-      const col = (user.uid===callData.from)?offerCandidates:answerCandidates;
-      col.add(event.candidate.toJSON());
-    }
-  }
-});
-
-// End call
-function endCall(){
-  window.location.href="chat.html";
-  pc.close();
-}
-</script>
+<script src="chat.js"></script>
 
 </body>
 </html>

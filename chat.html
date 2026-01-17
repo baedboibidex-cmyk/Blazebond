@@ -3,33 +3,48 @@
 <head>
   <title>Bondly Chat 💬</title>
   <link rel="stylesheet" href="style.css">
+
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
   <style>
-    #messages { 
-      height: 300px; 
-      overflow-y: auto; 
-      border: 1px solid #ddd; 
-      padding: 10px; 
-      border-radius: 10px; 
-      display: flex; 
-      flex-direction: column; 
+    #messages {
+      height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
     }
-    #messages p { margin:5px 0; padding:5px 10px; border-radius:10px; max-width:80%; }
-    .me { background:#ff4b6e; color:white; align-self:flex-end; margin-left:auto; }
-    .other { background:#eee; color:black; align-self:flex-start; margin-right:auto; }
-    #chat-container { display:flex; flex-direction:column; width:90%; max-width:500px; margin:auto; }
-    input, button { padding:10px; margin:5px 0; border-radius:10px; border:1px solid #ccc; }
-    button { cursor:pointer; }
+
+    #messages p {
+      margin: 5px 0;
+      padding: 5px 10px;
+      border-radius: 10px;
+      max-width: 80%;
+    }
+
+    .me { background: #ff4b6e; color: white; align-self: flex-end; margin-left: auto; }
+    .other { background: #eee; color: black; align-self: flex-start; margin-right: auto; }
+
+    #chat-container { display: flex; flex-direction: column; width: 90%; max-width: 500px; margin: auto; }
+    input, button { padding: 10px; margin: 5px 0; border-radius: 10px; border: 1px solid #ccc; }
+    button { cursor: pointer; }
   </style>
 </head>
 <body>
 
 <h2 id="chat-with">Loading...</h2>
-<button onclick="logout()" style="margin-bottom:15px;">Logout</button>
-<button onclick="startVideoCall()" style="background:#ff4b6e;color:white;padding:10px;border:none;border-radius:10px;margin-bottom:15px;">📹 Video Call</button>
+<button onclick="logout()" style="margin-bottom:10px;">Logout</button>
+
+<!-- Video Call button -->
+<button onclick="startVideoCall()" style="background:#ff4b6e;color:white;padding:10px;border:none;border-radius:10px;margin-bottom:10px;">
+📹 Video Call
+</button>
 
 <div id="chat-container">
   <div id="messages"></div>
@@ -38,91 +53,7 @@
 </div>
 
 <script src="firebase.js"></script>
-<script>
-const db = firebase.firestore();
-let user = null;
-let currentMatch = null;
-
-// Helper: generate unique chat ID
-function generateChatId(uid1, uid2){
-  return uid1 < uid2 ? uid1+"_"+uid2 : uid2+"_"+uid1;
-}
-
-// Auth check
-firebase.auth().onAuthStateChanged(async u=>{
-  if(!u) window.location.href="index.html";
-  user = u;
-
-  // Load first other user as match (for demo/test mode)
-  const snapshot = await db.collection("users").get();
-  snapshot.forEach(doc => {
-    if(doc.id !== user.uid && !currentMatch){
-      currentMatch = {id: doc.id, ...doc.data()};
-    }
-  });
-
-  if(!currentMatch){
-    document.getElementById("chat-with").innerText = "No users available 😢";
-    return;
-  }
-
-  document.getElementById("chat-with").innerText = "Chatting with " + currentMatch.username;
-  loadMessages();
-});
-
-// Send message
-function sendMessage(){
-  const text = document.getElementById("msg").value.trim();
-  if(!text || !currentMatch) return;
-
-  const chatId = generateChatId(user.uid, currentMatch.id);
-  db.collection("chats").doc(chatId).collection("messages").add({
-    sender: user.uid,
-    text: text,
-    time: firebase.firestore.FieldValue.serverTimestamp()
-  });
-
-  document.getElementById("msg").value = "";
-}
-
-// Load messages in real-time
-function loadMessages(){
-  const chatId = generateChatId(user.uid, currentMatch.id);
-  db.collection("chats").doc(chatId).collection("messages")
-    .orderBy("time")
-    .onSnapshot(snapshot=>{
-      const messagesDiv = document.getElementById("messages");
-      messagesDiv.innerHTML = "";
-      snapshot.forEach(doc=>{
-        const msg = doc.data();
-        const p = document.createElement("p");
-        p.innerText = msg.text;
-        p.className = msg.sender === user.uid ? "me" : "other";
-        messagesDiv.appendChild(p);
-      });
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    });
-}
-
-// Start video call
-function startVideoCall(){
-  if(!currentMatch) return;
-  const callDoc = db.collection("calls").doc();
-  callDoc.set({
-    from: user.uid,
-    to: currentMatch.id,
-    status: "initiated",
-    time: firebase.firestore.FieldValue.serverTimestamp()
-  }).then(()=>{
-    window.location.href = `call.html?callId=${callDoc.id}`;
-  });
-}
-
-// Logout
-function logout(){
-  firebase.auth().signOut().then(()=>window.location.href="index.html");
-}
-</script>
+<script src="chat.js"></script>
 
 </body>
 </html>

@@ -2,12 +2,11 @@
 <html>
 <head>
   <title>Bondly</title>
-
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="https://bondly-312ef.web.app/manifest.json">
   <meta name="theme-color" content="#ff4b6e">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://bondly-312ef.web.app/style.css">
 
-  <!-- Firebase SDKs (MUST be first) -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
@@ -27,14 +26,17 @@
     <p onclick="login()" style="cursor:pointer;">
       Already have an account? Login
     </p>
+
+    <!-- Navigation -->
+    <div class="nav">
+      <a href="https://bondly-312ef.web.app/profile.html">Profile</a>
+      <a href="https://bondly-312ef.web.app/matches.html">Matches</a>
+      <a href="https://bondly-312ef.web.app/status.html">Status</a>
+    </div>
   </div>
 
-  <!-- Firebase Config -->
-  <script src="firebase.js"></script>
-
-  <!-- Bondly App Logic -->
-  <script src="script.js"></script>
-
+  <script src="https://bondly-312ef.web.app/firebase.js"></script>
+  <script src="https://bondly-312ef.web.app/script.js"></script>
 </body>
 </html>
 

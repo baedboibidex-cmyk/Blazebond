@@ -1,27 +1,31 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Bondly Profile</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Bondly - Profile</title>
+  <link rel="manifest" href="https://bondly-312ef.web.app/manifest.json">
+  <link rel="stylesheet" href="https://bondly-312ef.web.app/style.css">
 </head>
 <body>
 
   <div class="container">
-    <h1>Welcome 💖</h1>
-    <p id="user"></p>
-    <button onclick="window.location.href='matches.html'">Find Matches</button>
-    <button onclick="logout()">Logout</button>
+    <h1>Your Profile</h1>
+    <p>Manage your account and preferences</p>
+
+    <div id="profile-info">
+      <!-- Firebase will fill user info here -->
+    </div>
+
+    <div class="nav">
+      <a href="https://bondly-312ef.web.app/index.html">Home</a>
+      <a href="https://bondly-312ef.web.app/matches.html">Matches</a>
+      <a href="https://bondly-312ef.web.app/status.html">Status</a>
+    </div>
   </div>
 
-  <script>
-    let user = JSON.parse(localStorage.getItem("bondlyUser"));
-    if (user) {
-      document.getElementById("user").innerText = "Hello " + user.username;
-    }
-
-    function logout() {
-      window.location.href = "index.html";
-    }
-  </script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="https://bondly-312ef.web.app/firebase.js"></script>
+  <script src="https://bondly-312ef.web.app/script.js"></script>
 </body>
 </html>
