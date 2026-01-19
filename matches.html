@@ -1,98 +1,78 @@
-<script src="firebase.js"></script>
-<script>
-const db = firebase.firestore();
-let user = null;
-let matches = [];
-let current = 0;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matches - Bondly</title>
+  <link rel="stylesheet" href="style.css">
 
-// AUTH + 18+ CHECK
-firebase.auth().onAuthStateChanged(async u => {
-  if(!u){
-    window.location.href = "index.html";
-    return;
-  }
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-  user = u;
+  <!-- Firebase config -->
+  <script src="firebase.js"></script>
 
-  // 🔞 CHECK AGE VERIFICATION
-  const userDoc = await db.collection("users").doc(user.uid).get();
-  if(!userDoc.exists || userDoc.data().is18Verified !== true){
-    window.location.href = "verify18.html";
-    return;
-  }
+  <!-- Page logic -->
+  <script defer src="script.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Matches 💌</h1>
+    <p>See your potential matches below!</p>
 
-  // LOAD MATCHES
-  const snapshot = await db.collection("users").get();
-  snapshot.forEach(doc => {
-    if(doc.id !== user.uid){
-      matches.push({ id: doc.id, ...doc.data() });
-    }
-  });
+    <div id="matchesList">
+      <!-- Matches will be displayed here -->
+    </div>
 
-  showMatch();
-});
+    <!-- Navigation -->
+    <div class="nav">
+      <a href="index.html">Home</a>
+      <a href="profile.html">Profile</a>
+      <a href="chat.html">Chat</a>
+      <a href="status.html">Status</a>
+      <a href="games.html">Games</a>
+      <a href="premium.html">Premium</a>
+      <a href="verify18.html">Verify 18+</a>
+    </div>
+  </div>
 
-// SHOW CURRENT MATCH
-function showMatch(){
-  if(matches.length === 0){
-    document.getElementById("card").innerHTML = "<p>No users available 😢</p>";
-    return;
-  }
-
-  const m = matches[current];
-  document.getElementById("match-name").innerText = m.username || "Unknown";
-  document.getElementById("match-age").innerText = m.age ? m.age + " years old" : "";
-  document.getElementById("match-img").src = m.img || "https://i.pravatar.cc/300";
-}
-
-// NEXT MATCH
-function nextMatch(){
-  if(matches.length === 0) return;
-  current = (current + 1) % matches.length;
-  showMatch();
-}
-
-// LIKE MATCH
-function likeMatch(){
-  if(matches.length === 0) return;
-
-  const likedUser = matches[current];
-
-  db.collection("users")
-    .doc(user.uid)
-    .collection("likes")
-    .doc(likedUser.id)
-    .set({ liked: true })
-    .then(async () => {
-
-      const mutual = await db.collection("users")
-        .doc(likedUser.id)
-        .collection("likes")
-        .doc(user.uid)
-        .get();
-
-      if(mutual.exists){
-        alert(`🎉 You matched with ${likedUser.username}!`);
-
-        const chatId =
-          user.uid < likedUser.id
-            ? user.uid + "_" + likedUser.id
-            : likedUser.id + "_" + user.uid;
-
-        await db.collection("chats").doc(chatId).set({
-          participants: [user.uid, likedUser.id],
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+  <script>
+    // 🔐 Ensure user is logged in
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        alert("Please login first!");
+        window.location.href = "index.html";
+        return;
       }
 
-      nextMatch();
-    });
-}
+      // Fetch all users except current user
+      db.collection('users').get().then(snapshot => {
+        const matchesDiv = document.getElementById('matchesList');
+        matchesDiv.innerHTML = '';
 
-// LOGOUT
-function logout(){
-  firebase.auth().signOut().then(() => {
-    window.location.href = "index.html";
-  });
-}
-</script>
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          if (doc.id !== user.uid) {
+            const matchCard = document.createElement('div');
+            matchCard.className = 'match-card';
+            matchCard.innerHTML = `
+              <h3>${data.username}</h3>
+              <p>${data.email}</p>
+              <button onclick="sendMessage('${doc.id}')">Message</button>
+            `;
+            matchesDiv.appendChild(matchCard);
+          }
+        });
+      });
+    });
+
+    // Function to send message (dummy redirect for now)
+    function sendMessage(userId) {
+      alert("Messaging " + userId);
+      window.location.href = "chat.html";
+    }
+  </script>
+</body>
+</html>
