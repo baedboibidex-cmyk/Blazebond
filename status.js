@@ -64,6 +64,8 @@ function loadStatuses(){
     .orderBy("createdAt", "desc")
     .onSnapshot(snapshot => {
       const statusesDiv = document.getElementById("statuses");
+      if (!statusesDiv) return;
+
       statusesDiv.innerHTML = "";
 
       snapshot.forEach(doc => {

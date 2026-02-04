@@ -1,59 +1,73 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Bondly Chat 💬</title>
+  <title>Bondly Video Call 📹</title>
   <link rel="stylesheet" href="style.css">
-
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
   <style>
-    #messages {
-      height: 300px;
-      overflow-y: auto;
-      border: 1px solid #ddd;
-      padding: 10px;
-      border-radius: 10px;
-      margin-bottom: 10px;
-      display: flex;
-      flex-direction: column;
+    #video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 10px;
+      margin: 20px;
     }
-
-    #messages p {
-      margin: 5px 0;
-      padding: 5px 10px;
+    video {
+      width: 100%;
+      height: auto;
+      background: #333;
       border-radius: 10px;
-      max-width: 80%;
     }
-
-    .me { background: #ff4b6e; color: white; align-self: flex-end; margin-left: auto; }
-    .other { background: #eee; color: black; align-self: flex-start; margin-right: auto; }
-
-    #chat-container { display: flex; flex-direction: column; width: 90%; max-width: 500px; margin: auto; }
-    input, button { padding: 10px; margin: 5px 0; border-radius: 10px; border: 1px solid #ccc; }
-    button { cursor: pointer; }
+    .controls {
+      margin: 20px;
+    }
   </style>
 </head>
 <body>
 
-<h2 id="chat-with">Loading...</h2>
-<button onclick="logout()" style="margin-bottom:10px;">Logout</button>
+<div class="container">
+  <h1>Video Call</h1>
+  <div id="video-grid">
+    <video id="localVideo" autoplay muted playsinline></video>
+    <video id="remoteVideo" autoplay playsinline></video>
+  </div>
 
-<!-- Video Call button -->
-<button onclick="startVideoCall()" style="background:#ff4b6e;color:white;padding:10px;border:none;border-radius:10px;margin-bottom:10px;">
-📹 Video Call
-</button>
-
-<div id="chat-container">
-  <div id="messages"></div>
-  <input type="text" id="msg" placeholder="Type a message">
-  <button onclick="sendMessage()">Send</button>
+  <div id="call-status" style="margin: 10px; font-weight: bold;">Connecting...</div>
+  <div class="controls">
+    <button id="hangupBtn" style="background: #ff4b6e; color: white;">Hang Up</button>
+  </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 <script src="firebase.js"></script>
-<script src="chat.js"></script>
+<script src="navbar.js"></script>
+<script>
+  // Simple Mock/Placeholder for Video Call Logic
+  const urlParams = new URLSearchParams(window.location.search);
+  const callId = urlParams.get('callId');
+
+  if (!callId) {
+    alert("No call ID found!");
+    window.location.href = "matches.html";
+  }
+
+  document.getElementById('hangupBtn').addEventListener('click', () => {
+    // In a real app, we'd update the call document to "ended"
+    db.collection('calls').doc(callId).update({ status: 'ended' })
+      .then(() => window.location.href = "chat.html");
+  });
+
+  // Mocking remote stream
+  auth.onAuthStateChanged(user => {
+    if (!user) window.location.href = "index.html";
+    console.log("Joined call:", callId);
+
+    // Simulate connection
+    setTimeout(() => {
+      document.getElementById('call-status').innerText = "In Call";
+    }, 2000);
+  });
+</script>
 
 </body>
 </html>
