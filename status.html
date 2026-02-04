@@ -2,8 +2,8 @@
 <html>
 <head>
   <title>Bondly - Status</title>
-  <link rel="manifest" href="https://bondly-312ef.web.app/manifest.json">
-  <link rel="stylesheet" href="https://bondly-312ef.web.app/style.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -11,21 +11,27 @@
     <h1>Status</h1>
     <p>See your activity and updates</p>
 
-    <div id="status-info">
-      <!-- Firebase will fill status info here -->
+    <div id="post-status" style="margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 20px;">
+      <textarea id="status-text" placeholder="What's on your mind?" style="width: 100%; padding: 10px; border-radius: 10px; border: none; margin-bottom: 10px;"></textarea>
+      <input type="file" id="status-img" accept="image/*" style="margin-bottom: 10px;">
+      <label style="display: block; margin-bottom: 10px;">
+        <input type="checkbox" id="spicy-checkbox"> Spicy (Premium Only) 🔥
+      </label>
+      <button onclick="postStatus()">Post Status</button>
     </div>
 
-    <div class="nav">
-      <a href="https://bondly-312ef.web.app/index.html">Home</a>
-      <a href="https://bondly-312ef.web.app/profile.html">Profile</a>
-      <a href="https://bondly-312ef.web.app/matches.html">Matches</a>
+    <div id="statuses">
+      <!-- Firebase will fill status info here -->
     </div>
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-  <script src="https://bondly-312ef.web.app/firebase.js"></script>
-  <script src="https://bondly-312ef.web.app/script.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+  <script src="firebase.js"></script>
+  <script src="script.js"></script>
+  <script src="navbar.js"></script>
+  <script src="status.js"></script>
 </body>
 </html>

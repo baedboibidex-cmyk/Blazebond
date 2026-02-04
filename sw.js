@@ -5,6 +5,19 @@ const ASSETS = [
   '/style.css',
   '/script.js',
   '/firebase.js',
+  '/navbar.js',
+  '/profile.html',
+  '/profile.js',
+  '/matches.html',
+  '/matches.js',
+  '/chat.html',
+  '/chat.js',
+  '/status.html',
+  '/status.js',
+  '/games.html',
+  '/premium.html',
+  '/verify18.html',
+  '/call.html',
   '/manifest.json'
 ];
 

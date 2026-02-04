@@ -7,11 +7,14 @@ body {
 }
 
 .container {
-  max-width: 400px;
-  margin: 60px auto;
-  background: rgba(0,0,0,0.2);
+  max-width: 500px;
+  width: 90%;
+  margin: 40px auto;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
   padding: 30px;
   border-radius: 20px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
 
 h1 {
@@ -44,12 +47,16 @@ button:hover {
 }
 
 .nav-bar {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.5);
   padding: 15px;
   display: flex;
   justify-content: center;
   gap: 15px;
   flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
 }
 
 .nav-bar a {
@@ -70,4 +77,24 @@ button:hover {
   margin: 10px 0;
   border-radius: 10px;
   text-align: left;
+}
+
+.status {
+  background: white;
+  color: #333;
+  padding: 15px;
+  margin: 15px 0;
+  border-radius: 10px;
+  text-align: left;
+}
+
+.status img {
+  max-width: 100%;
+  border-radius: 10px;
+  margin-top: 10px;
+}
+
+.status.spicy {
+  border: 2px solid #ff4b6e;
+  background: #fff0f3;
 }
