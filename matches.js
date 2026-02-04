@@ -12,6 +12,8 @@ auth.onAuthStateChanged(user => {
     .get()
     .then(snapshot => {
       const matchesContainer = document.getElementById("matchesContainer");
+      if (!matchesContainer) return;
+
       if (snapshot.empty) {
         matchesContainer.innerHTML = "<p>No matches found yet!</p>";
         return;

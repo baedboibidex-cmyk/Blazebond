@@ -1,4 +1,3 @@
-const db = firebase.firestore();
 let user = null;
 let matches = [];
 let currentMatch = null;
@@ -8,20 +7,36 @@ function generateChatId(uid1, uid2){
   return uid1 < uid2 ? uid1 + "_" + uid2 : uid2 + "_" + uid1;
 }
 
-// Check auth & load first available match
-firebase.auth().onAuthStateChanged(async u => {
-  if(!u) window.location.href = "index.html";
+// Check auth & load match from URL or first available
+auth.onAuthStateChanged(async u => {
+  if(!u) {
+    window.location.href = "index.html";
+    return;
+  }
   user = u;
 
-  // Load other users
-  const snapshot = await db.collection("users").get();
-  snapshot.forEach(doc => {
-    if(doc.id !== user.uid) matches.push({id: doc.id, ...doc.data()});
-  });
+  const urlParams = new URLSearchParams(window.location.search);
+  const targetUid = urlParams.get('uid');
 
-  if(matches.length > 0){
-    currentMatch = matches[0];
-    document.getElementById("chat-with").innerText = "Chatting with " + currentMatch.username;
+  if (targetUid) {
+    const doc = await db.collection("users").doc(targetUid).get();
+    if (doc.exists) {
+      currentMatch = {id: doc.id, ...doc.data()};
+    }
+  }
+
+  if (!currentMatch) {
+    // Fallback to first available user
+    const snapshot = await db.collection("users").limit(5).get();
+    snapshot.forEach(doc => {
+      if(doc.id !== user.uid && !currentMatch) {
+        currentMatch = {id: doc.id, ...doc.data()};
+      }
+    });
+  }
+
+  if(currentMatch){
+    document.getElementById("chat-with").innerText = "Chatting with " + (currentMatch.username || currentMatch.email);
     loadMessages();
   } else {
     document.getElementById("chat-with").innerText = "No users available 😢";
@@ -79,9 +94,4 @@ function startVideoCall(){
     // Pass callId as URL param to call.html
     window.location.href = `call.html?callId=${callDoc.id}`;
   });
-}
-
-// Logout
-function logout(){
-  firebase.auth().signOut().then(() => window.location.href = "index.html");
 }
