@@ -1,64 +1,80 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Bondly Premium 💳</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Premium - Bondly</title>
   <link rel="stylesheet" href="style.css">
+  <script defer src="navbar.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Upgrade to Premium 💳</h1>
+    <p>Get access to exclusive features!</p>
+    <button id="payButton">Pay ₦1000</button>
+  </div>
 
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-  <style>
-    body { text-align: center; padding: 50px; font-family: Arial, sans-serif; }
-    button { padding: 15px 25px; font-size: 16px; border-radius: 10px; border: none; background: #ff4b6e; color: white; cursor: pointer; }
-    #status { margin-top: 20px; font-weight: bold; }
-  </style>
-</head>
-<body>
+  <!-- Paystack SDK -->
+  <script src="https://js.paystack.co/v1/inline.js"></script>
 
-<h2>Upgrade to Premium 💳</h2>
-<p>Unlock spicy games, exclusive matches & more!</p>
+  <!-- Firebase config -->
+  <script src="firebase.js"></script>
 
-<button onclick="pay()">Pay with Paystack (Test)</button>
-<div id="status"></div>
-
-<script src="firebase.js"></script>
-<script src="https://js.paystack.co/v1/inline.js"></script>
-<script>
-  const db = firebase.firestore();
-  let user = null;
-
-  // Auth check
-  firebase.auth().onAuthStateChanged(u => {
-    if(!u) window.location.href = "index.html";
-    user = u;
-  });
-
-  function pay(){
-    if(!user) return;
-
-    const handler = PaystackPop.setup({
-      key: 'pk_test_xxxxxxxxxxxxxxxxxxxxx', // Replace with your Paystack test public key
-      email: user.email,
-      amount: 5000, // 50 NGN in kobo
-      currency: "NGN",
-      ref: '' + Math.floor(Math.random() * 1000000000 + 1),
-      callback: function(response){
-        // Payment successful
-        db.collection("users").doc(user.uid).update({
-          isPremium: true
-        }).then(()=>{
-          document.getElementById("status").innerText = "🎉 Payment successful! Premium unlocked.";
-          setTimeout(()=>{ window.location.href="games.html"; }, 1500);
-        });
-      },
-      onClose: function(){
-        alert('Payment cancelled.');
+  <script>
+    // 🛡️ Check if user is logged in
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        alert("Please login first!");
+        window.location.href = "index.html";
+        return;
       }
     });
-    handler.openIframe();
-  }
-</script>
 
+    // 🔑 Handle Premium payment
+    const payButton = document.getElementById('payButton');
+
+    payButton.addEventListener('click', () => {
+      const user = auth.currentUser;
+      if (!user) {
+        alert("Please login first!");
+        return;
+      }
+
+      let handler = PaystackPop.setup({
+        key: 'pk_test_01dccc55e7797eec7f39f897124d87c99a615883', // ✅ Your Paystack Public Key
+        email: user.email,
+        amount: 1000 * 100, // Amount in kobo
+        currency: 'NGN',
+        ref: 'BON-' + Math.floor(Math.random() * 1000000000),
+        callback: function(response) {
+          alert('Payment complete! Ref: ' + response.reference);
+          
+          // Update Firestore to mark user as Premium
+          db.collection('users').doc(user.uid).update({
+            isPremium: true,
+            premiumSince: firebase.firestore.FieldValue.serverTimestamp()
+          })
+          .then(() => {
+            alert("You are now Premium 🎉");
+            window.location.href = "profile.html";
+          })
+          .catch(err => {
+            console.error(err);
+            alert("Upgrade failed. Please contact support.");
+          });
+        },
+        onClose: function() {
+          alert('Payment cancelled.');
+        }
+      });
+
+      handler.openIframe();
+    });
+  </script>
 </body>
 </html>

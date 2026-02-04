@@ -3,6 +3,7 @@
 <head>
   <title>Bondly Games 🔥</title>
   <link rel="stylesheet" href="style.css">
+  <script defer src="navbar.js"></script>
 
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -31,11 +32,10 @@
 
 <script src="firebase.js"></script>
 <script>
-  const db = firebase.firestore();
   let user = null;
 
   // 🔞 Age & 💳 Premium check + game start
-  firebase.auth().onAuthStateChanged(async u => {
+  auth.onAuthStateChanged(async u => {
     if(!u){
       window.location.href = "index.html";
       return;
