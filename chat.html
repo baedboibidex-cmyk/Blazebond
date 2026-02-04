@@ -3,6 +3,7 @@
 <head>
   <title>Bondly Chat 💬</title>
   <link rel="stylesheet" href="style.css">
+  <script defer src="navbar.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
@@ -39,7 +40,6 @@
 
 <script src="firebase.js"></script>
 <script>
-const db = firebase.firestore();
 let user = null;
 let currentMatch = null;
 
@@ -49,17 +49,32 @@ function generateChatId(uid1, uid2){
 }
 
 // Auth check
-firebase.auth().onAuthStateChanged(async u=>{
-  if(!u) window.location.href="index.html";
+auth.onAuthStateChanged(async u=>{
+  if(!u) {
+    window.location.href="index.html";
+    return;
+  }
   user = u;
 
-  // Load first other user as match (for demo/test mode)
-  const snapshot = await db.collection("users").get();
-  snapshot.forEach(doc => {
-    if(doc.id !== user.uid && !currentMatch){
+  const urlParams = new URLSearchParams(window.location.search);
+  const matchId = urlParams.get("uid");
+
+  if (matchId) {
+    const doc = await db.collection("users").doc(matchId).get();
+    if (doc.exists) {
       currentMatch = {id: doc.id, ...doc.data()};
     }
-  });
+  }
+
+  if (!currentMatch) {
+    // Load first other user as match (fallback)
+    const snapshot = await db.collection("users").limit(10).get();
+    snapshot.forEach(doc => {
+      if(doc.id !== user.uid && !currentMatch){
+        currentMatch = {id: doc.id, ...doc.data()};
+      }
+    });
+  }
 
   if(!currentMatch){
     document.getElementById("chat-with").innerText = "No users available 😢";
@@ -120,7 +135,7 @@ function startVideoCall(){
 
 // Logout
 function logout(){
-  firebase.auth().signOut().then(()=>window.location.href="index.html");
+  auth.signOut().then(()=>window.location.href="index.html");
 }
 </script>
 
