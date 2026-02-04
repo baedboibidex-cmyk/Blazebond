@@ -35,4 +35,39 @@ button {
   color: #ff4b6e;
   font-size: 16px;
   font-weight: bold;
+  cursor: pointer;
+  transition: opacity 0.3s;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+.nav-bar {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.nav-bar a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.nav-bar a:hover {
+  text-decoration: underline;
+}
+
+.match {
+  background: white;
+  color: #333;
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 10px;
+  text-align: left;
 }

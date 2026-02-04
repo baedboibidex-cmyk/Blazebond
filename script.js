@@ -1,14 +1,21 @@
-// Clear old service workers
+// Register Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.getRegistrations()
-      .then(r => r.forEach(reg => reg.unregister()))
-      .catch(err => console.log(err));
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => console.log('Service Worker registered'))
+      .catch(err => console.log('Service Worker registration failed', err));
   });
 }
 
-const auth = firebase.auth();
-const db = firebase.firestore();
+// Check if already logged in
+auth.onAuthStateChanged(user => {
+  if (user) {
+    // If on index.html, maybe don't auto-redirect to allow logout if needed,
+    // but usually we want to go to matches.
+    // For now, let's just log it.
+    console.log("User is logged in:", user.email);
+  }
+});
 
 // SIGN UP
 function signup() {
@@ -23,7 +30,10 @@ function signup() {
       username, email, is18Verified: false, isPremium: false,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     }))
-    .then(() => { alert("Account created!"); window.location.href="matches.html"; })
+    .then(() => {
+      alert("Account created!");
+      window.location.href="profile.html";
+    })
     .catch(e => alert(e.message));
 }
 
@@ -35,6 +45,6 @@ function login() {
   if (!email || !password) { alert("Fill all fields"); return; }
 
   auth.signInWithEmailAndPassword(email, password)
-    .then(() => window.location.href="chat.html")
+    .then(() => window.location.href="profile.html")
     .catch(e => alert(e.message));
 }

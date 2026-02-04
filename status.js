@@ -1,10 +1,12 @@
-const db = firebase.firestore();
-const storage = firebase.storage();
 let user = null;
+let isPremium = false;
 
 // Auth & Premium / 18+ lock
-firebase.auth().onAuthStateChanged(async u => {
-  if(!u) window.location.href="index.html";
+auth.onAuthStateChanged(async u => {
+  if(!u) {
+    window.location.href="index.html";
+    return;
+  }
   user = u;
 
   const doc = await db.collection("users").doc(user.uid).get();
@@ -15,6 +17,7 @@ firebase.auth().onAuthStateChanged(async u => {
     return;
   }
 
+  isPremium = data.isPremium || false;
   loadStatuses();
 });
 
@@ -71,7 +74,7 @@ function loadStatuses(){
         if((now - createdAt)/1000/60/60 > 24) return;
 
         // Skip spicy content if user not premium
-        if(s.isSpicy && !docUserIsPremium) return;
+        if(s.isSpicy && !isPremium) return;
 
         const div = document.createElement("div");
         div.className = "status";

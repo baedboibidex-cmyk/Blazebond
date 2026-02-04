@@ -2,6 +2,8 @@
 <html>
 <head>
   <title>Bondly Video Call</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="navbar.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
@@ -21,7 +23,6 @@
 
 <script src="firebase.js"></script>
 <script>
-const db = firebase.firestore();
 let user = null;
 
 const urlParams = new URLSearchParams(window.location.search);
@@ -36,7 +37,7 @@ const localVideo = document.getElementById("localVideo");
 const remoteVideo = document.getElementById("remoteVideo");
 
 // Auth check
-firebase.auth().onAuthStateChanged(async u=>{
+auth.onAuthStateChanged(async u=>{
   if(!u) window.location.href="index.html";
   user = u;
 

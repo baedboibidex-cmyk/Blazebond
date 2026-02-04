@@ -1,19 +1,3 @@
-// 🔥 Clear old Firebase service workers
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.getRegistrations()
-      .then(registrations => {
-        registrations.forEach(registration => registration.unregister());
-      })
-      .catch(err => {
-        console.log("Service worker cleanup failed:", err);
-      });
-  });
-}
-
-// 🔐 Initialize Firebase auth and database
-const auth = firebase.auth();
-const db = firebase.firestore();
 
 // 🛡️ Check if user is logged in
 auth.onAuthStateChanged(user => {
@@ -25,7 +9,6 @@ auth.onAuthStateChanged(user => {
 
   // 🔎 Load matches for the logged-in user
   db.collection("users")
-    .where("is18Verified", "==", true) // Only verified users
     .get()
     .then(snapshot => {
       const matchesContainer = document.getElementById("matchesContainer");
@@ -45,8 +28,9 @@ auth.onAuthStateChanged(user => {
         matchDiv.classList.add("match");
 
         matchDiv.innerHTML = `
-          <h3>${data.username}</h3>
+          <h3>${data.username} ${data.is18Verified ? '🔞✅' : ''}</h3>
           <p>Email: ${data.email}</p>
+          <button onclick="window.location.href='chat.html?uid=${doc.id}'">Chat</button>
         `;
         matchesContainer.appendChild(matchDiv);
       });

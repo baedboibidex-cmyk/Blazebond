@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Premium - Bondly</title>
   <link rel="stylesheet" href="style.css">
+  <script defer src="navbar.js"></script>
 </head>
 <body>
   <div class="container">
@@ -25,10 +26,6 @@
   <script src="firebase.js"></script>
 
   <script>
-    // 🔐 Initialize Firebase auth and Firestore
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-
     // 🛡️ Check if user is logged in
     auth.onAuthStateChanged(user => {
       if (!user) {
@@ -62,8 +59,14 @@
             isPremium: true,
             premiumSince: firebase.firestore.FieldValue.serverTimestamp()
           })
-          .then(() => console.log("User upgraded to Premium"))
-          .catch(err => console.error(err));
+          .then(() => {
+            alert("You are now Premium 🎉");
+            window.location.href = "profile.html";
+          })
+          .catch(err => {
+            console.error(err);
+            alert("Upgrade failed. Please contact support.");
+          });
         },
         onClose: function() {
           alert('Payment cancelled.');
