@@ -1,4 +1,6 @@
 // 🔐 Firebase configuration
+// NOTE: Please update apiKey and other fields with your actual Firebase project credentials.
+// The project 'bondly-312ef' appears to have been deleted.
 const firebaseConfig = {
   apiKey: "YOUR_API_KEY",
   authDomain: "bondly-312ef.firebaseapp.com",
@@ -9,6 +11,9 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
+if (firebaseConfig.apiKey === "YOUR_API_KEY") {
+  console.warn("Firebase API Key is missing! Please update firebase.js with your project credentials.");
+}
 firebase.initializeApp(firebaseConfig);
 
 // Initialize Firebase auth, Firestore, and Storage
