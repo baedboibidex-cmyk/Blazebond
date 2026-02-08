@@ -11,11 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # NOTE: The Firebase project 'bondly-312ef' appears to be deleted.
+      # NOTE: The Firebase project 'blazebond-312ef' appears to be deleted.
       # Deployment is disabled until a new project is configured.
       # - uses: FirebaseExtended/action-hosting-deploy@v0
       #   with:
       #     repoToken: ${{ secrets.GITHUB_TOKEN }}
       #     firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BONDLY_312EF }}
       #     channelId: live
-      #     projectId: bondly-312ef
+      #     projectId: blazebond-312ef
