@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bondly-v1';
+const CACHE_NAME = 'blazebond-v1';
 const ASSETS = [
   '/',
   '/index.html',

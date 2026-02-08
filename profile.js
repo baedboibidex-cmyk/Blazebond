@@ -16,13 +16,13 @@ auth.onAuthStateChanged(user => {
       const profileInfo = document.getElementById("profile-info");
 
       profileInfo.innerHTML = `
-        <div class="profile-card" style="background: white; color: #333; padding: 20px; border-radius: 10px; margin-top: 20px; text-align: left;">
+        <div class="match profile-card">
           <p><strong>Username:</strong> ${data.username || 'N/A'}</p>
           <p><strong>Email:</strong> ${data.email}</p>
           <p><strong>18+ Verified:</strong> ${data.is18Verified ? '✅ Yes' : '❌ No'}</p>
           <p><strong>Premium Status:</strong> ${data.isPremium ? '💎 Premium' : '🆓 Free'}</p>
-          ${!data.is18Verified ? '<button onclick="window.location.href=\'verify18.html\'" style="margin-top: 10px;">Verify 18+</button>' : ''}
-          ${!data.isPremium ? '<button onclick="window.location.href=\'premium.html\'" style="margin-top: 10px; background: #ff4b6e; color: white;">Get Premium</button>' : ''}
+          ${!data.is18Verified ? '<button onclick="window.location.href=\'verify18.html\'">Verify 18+</button>' : ''}
+          ${!data.isPremium ? '<button onclick="window.location.href=\'premium.html\'" style="background: var(--primary); color: white;">Get Premium</button>' : ''}
         </div>
       `;
     })
