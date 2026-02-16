@@ -1,5 +1,8 @@
+import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc, collection, getDocs, limit, query, orderBy, addDoc, serverTimestamp, onSnapshot } from "firebase/firestore";
+import { auth, db } from "./firebase.js"; // assuming you exported these in firebase.js
+
 let user = null;
-let matches = [];
 let currentMatch = null;
 
 // Generate unique chat ID based on user IDs
@@ -8,7 +11,7 @@ function generateChatId(uid1, uid2){
 }
 
 // Check auth & load match from URL or first available
-auth.onAuthStateChanged(async u => {
+onAuthStateChanged(auth, async (u) => {
   if(!u) {
     window.location.href = "index.html";
     return;
@@ -19,18 +22,19 @@ auth.onAuthStateChanged(async u => {
   const targetUid = urlParams.get('uid');
 
   if (targetUid) {
-    const doc = await db.collection("users").doc(targetUid).get();
-    if (doc.exists) {
-      currentMatch = {id: doc.id, ...doc.data()};
+    const docRef = doc(db, "users", targetUid);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      currentMatch = { id: docSnap.id, ...docSnap.data() };
     }
   }
 
   if (!currentMatch) {
-    // Fallback to first available user
-    const snapshot = await db.collection("users").limit(5).get();
-    snapshot.forEach(doc => {
-      if(doc.id !== user.uid && !currentMatch) {
-        currentMatch = {id: doc.id, ...doc.data()};
+    const q = query(collection(db, "users"), limit(5));
+    const snapshot = await getDocs(q);
+    snapshot.forEach(docSnap => {
+      if(docSnap.id !== user.uid && !currentMatch) {
+        currentMatch = { id: docSnap.id, ...docSnap.data() };
       }
     });
   }
@@ -44,15 +48,17 @@ auth.onAuthStateChanged(async u => {
 });
 
 // Send a chat message
-function sendMessage(){
+async function sendMessage(){
   const text = document.getElementById("msg").value.trim();
   if(!text || !currentMatch) return;
 
   const chatId = generateChatId(user.uid, currentMatch.id);
-  db.collection("chats").doc(chatId).collection("messages").add({
+  const messagesRef = collection(db, "chats", chatId, "messages");
+
+  await addDoc(messagesRef, {
     sender: user.uid,
     text: text,
-    time: firebase.firestore.FieldValue.serverTimestamp()
+    time: serverTimestamp()
   });
 
   document.getElementById("msg").value = "";
@@ -61,37 +67,36 @@ function sendMessage(){
 // Load messages in real-time
 function loadMessages(){
   const chatId = generateChatId(user.uid, currentMatch.id);
-  db.collection("chats").doc(chatId).collection("messages")
-    .orderBy("time")
-    .onSnapshot(snapshot => {
-      const messagesDiv = document.getElementById("messages");
-      messagesDiv.innerHTML = "";
+  const messagesRef = collection(db, "chats", chatId, "messages");
+  const q = query(messagesRef, orderBy("time"));
 
-      snapshot.forEach(doc => {
-        const msg = doc.data();
-        const p = document.createElement("p");
-        p.innerText = msg.text;
-        p.className = msg.sender === user.uid ? "me" : "other";
-        messagesDiv.appendChild(p);
-      });
+  onSnapshot(q, (snapshot) => {
+    const messagesDiv = document.getElementById("messages");
+    messagesDiv.innerHTML = "";
 
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    snapshot.forEach(docSnap => {
+      const msg = docSnap.data();
+      const p = document.createElement("p");
+      p.innerText = msg.text;
+      p.className = msg.sender === user.uid ? "me" : "other";
+      messagesDiv.appendChild(p);
     });
+
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  });
 }
 
 // Start a video call
-function startVideoCall(){
+async function startVideoCall(){
   if(!currentMatch) return;
 
-  // Save a call document in Firestore for signaling
-  const callDoc = db.collection('calls').doc();
-  callDoc.set({
+  const callRef = doc(collection(db, "calls"));
+  await setDoc(callRef, {
     from: user.uid,
     to: currentMatch.id,
     status: "initiated",
-    time: firebase.firestore.FieldValue.serverTimestamp()
-  }).then(() => {
-    // Pass callId as URL param to call.html
-    window.location.href = `call.html?callId=${callDoc.id}`;
+    time: serverTimestamp()
   });
+
+  window.location.href = `call.html?callId=${callRef.id}`;
 }

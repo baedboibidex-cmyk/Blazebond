@@ -1,50 +1,69 @@
-// Register Service Worker
+// Register Blazebond Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js')
-      .then(reg => console.log('Service Worker registered'))
-      .catch(err => console.log('Service Worker registration failed', err));
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('Blazebond Service Worker registered:', reg.scope))
+      .catch(err => console.error('Blazebond Service Worker registration failed:', err));
   });
 }
 
-// Check if already logged in
+// Check if user is already logged in
 auth.onAuthStateChanged(user => {
   if (user) {
-    // If on index.html, maybe don't auto-redirect to allow logout if needed,
-    // but usually we want to go to matches.
-    // For now, let's just log it.
-    console.log("User is logged in:", user.email);
+    console.log("Blazebond user logged in:", user.email);
+    // Optionally redirect to matches.html or profile.html if not on index.html
+    if (window.location.pathname.endsWith('index.html')) {
+      window.location.href = "matches.html";
+    }
   }
 });
 
-// SIGN UP
-function signup() {
-  const email = document.getElementById("email").value;
+// Blazebond Sign Up
+async function signup() {
+  const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
-  const username = document.getElementById("username").value;
+  const username = document.getElementById("username").value.trim();
 
-  if (!email || !password || !username) { alert("Fill all fields"); return; }
+  if (!email || !password || !username) {
+    alert("Please fill in all fields.");
+    return;
+  }
 
-  auth.createUserWithEmailAndPassword(email, password)
-    .then(u => db.collection("users").doc(u.user.uid).set({
-      username, email, is18Verified: false, isPremium: false,
+  try {
+    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+    const user = userCredential.user;
+
+    await db.collection("users").doc(user.uid).set({
+      username,
+      email,
+      is18Verified: false,
+      isPremium: false,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    }))
-    .then(() => {
-      alert("Account created!");
-      window.location.href="profile.html";
-    })
-    .catch(e => alert(e.message));
+    });
+
+    alert("Blazebond account created successfully!");
+    window.location.href = "profile.html";
+  } catch (error) {
+    console.error("Blazebond signup error:", error);
+    alert(`Failed to create account: ${error.message}`);
+  }
 }
 
-// LOGIN
-function login() {
-  const email = document.getElementById("email").value;
+// Blazebond Login
+async function login() {
+  const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
 
-  if (!email || !password) { alert("Fill all fields"); return; }
+  if (!email || !password) {
+    alert("Please enter your email and password.");
+    return;
+  }
 
-  auth.signInWithEmailAndPassword(email, password)
-    .then(() => window.location.href="profile.html")
-    .catch(e => alert(e.message));
+  try {
+    await auth.signInWithEmailAndPassword(email, password);
+    window.location.href = "matches.html";
+  } catch (error) {
+    console.error("Blazebond login error:", error);
+    alert(`Failed to log in: ${error.message}`);
+  }
 }

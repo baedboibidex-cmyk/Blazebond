@@ -1,73 +1,87 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Bondly Video Call 📹</title>
-  <link rel="stylesheet" href="style.css">
-  <style>
-    #video-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 10px;
-      margin: 20px;
+import { onAuthStateChanged } from "firebase/auth";
+import { doc, setDoc, getDoc, updateDoc, collection, addDoc, onSnapshot } from "firebase/firestore";
+import { auth, db } from "./firebase.js";
+
+const localVideo = document.getElementById("localVideo");
+const remoteVideo = document.getElementById("remoteVideo");
+const callStatus = document.getElementById("call-status");
+const hangupBtn = document.getElementById("hangupBtn");
+
+const urlParams = new URLSearchParams(window.location.search);
+const callId = urlParams.get("callId");
+
+let pc; // RTCPeerConnection
+
+async function initCall() {
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "index.html";
+      return;
     }
-    video {
-      width: 100%;
-      height: auto;
-      background: #333;
-      border-radius: 10px;
+
+    // Setup peer connection
+    pc = new RTCPeerConnection();
+
+    // Local stream
+    const localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+    localVideo.srcObject = localStream;
+
+    // Remote stream
+    const remoteStream = new MediaStream();
+    remoteVideo.srcObject = remoteStream;
+    pc.ontrack = event => event.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
+
+    // Firestore references
+    const callRef = doc(db, "calls", callId);
+    const offerCandidates = collection(callRef, "offerCandidates");
+    const answerCandidates = collection(callRef, "answerCandidates");
+
+    // ICE candidates
+    pc.onicecandidate = event => {
+      if (event.candidate) {
+        addDoc(offerCandidates, event.candidate.toJSON());
+      }
+    };
+
+    // Caller flow
+    const callDoc = await getDoc(callRef);
+    if (!callDoc.exists()) {
+      // Create offer
+      const offerDescription = await pc.createOffer();
+      await pc.setLocalDescription(offerDescription);
+
+      await setDoc(callRef, { offer: { type: offerDescription.type, sdp: offerDescription.sdp }, status: "initiated" });
     }
-    .controls {
-      margin: 20px;
-    }
-  </style>
-</head>
-<body>
 
-<div class="container">
-  <h1>Video Call</h1>
-  <div id="video-grid">
-    <video id="localVideo" autoplay muted playsinline></video>
-    <video id="remoteVideo" autoplay playsinline></video>
-  </div>
+    // Listen for answer
+    onSnapshot(callRef, async snapshot => {
+      const data = snapshot.data();
+      if (data?.answer && !pc.currentRemoteDescription) {
+        const answerDesc = new RTCSessionDescription(data.answer);
+        await pc.setRemoteDescription(answerDesc);
+        callStatus.innerText = "In Call";
+      }
+    });
 
-  <div id="call-status" style="margin: 10px; font-weight: bold;">Connecting...</div>
-  <div class="controls">
-    <button id="hangupBtn" style="background: #ff4b6e; color: white;">Hang Up</button>
-  </div>
-</div>
-
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-<script src="firebase.js"></script>
-<script src="navbar.js"></script>
-<script>
-  // Simple Mock/Placeholder for Video Call Logic
-  const urlParams = new URLSearchParams(window.location.search);
-  const callId = urlParams.get('callId');
-
-  if (!callId) {
-    alert("No call ID found!");
-    window.location.href = "matches.html";
-  }
-
-  document.getElementById('hangupBtn').addEventListener('click', () => {
-    // In a real app, we'd update the call document to "ended"
-    db.collection('calls').doc(callId).update({ status: 'ended' })
-      .then(() => window.location.href = "chat.html");
+    // Listen for ICE candidates from callee
+    onSnapshot(answerCandidates, snapshot => {
+      snapshot.docChanges().forEach(change => {
+        if (change.type === "added") {
+          const candidate = new RTCIceCandidate(change.doc.data());
+          pc.addIceCandidate(candidate);
+        }
+      });
+    });
   });
+}
 
-  // Mocking remote stream
-  auth.onAuthStateChanged(user => {
-    if (!user) window.location.href = "index.html";
-    console.log("Joined call:", callId);
+// Hang up
+hangupBtn.addEventListener("click", async () => {
+  if (pc) pc.close();
+  const callRef = doc(db, "calls", callId);
+  await updateDoc(callRef, { status: "ended" });
+  window.location.href = "chat.html";
+});
 
-    // Simulate connection
-    setTimeout(() => {
-      document.getElementById('call-status').innerText = "In Call";
-    }, 2000);
-  });
-</script>
-
-</body>
-</html>
+initCall();

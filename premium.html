@@ -3,14 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Premium - Bondly</title>
+  <title>Premium - BlazeBond</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
-    <h1>Upgrade to Premium 💳</h1>
-    <p>Get access to exclusive features!</p>
-    <button id="payButton">Pay ₦1000</button>
+    <h1>🔥 Upgrade to BlazeBond Premium 💳</h1>
+    <p>Unlock exclusive features and enjoy the full BlazeBond experience!</p>
+    <button id="payButton" style="
+      background: linear-gradient(135deg, #ff4b6e, #ff9a8b);
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: 0.3s;
+    ">Pay ₦1000</button>
   </div>
 
   <!-- Firebase SDKs -->
@@ -50,7 +59,7 @@
         email: user.email,
         amount: 1000 * 100, // Amount in kobo
         currency: 'NGN',
-        ref: 'BON-' + Math.floor(Math.random() * 1000000000),
+        ref: 'BBOND-' + Math.floor(Math.random() * 1000000000), // 🔥 BlazeBond reference
         callback: function(response) {
           alert('Payment complete! Ref: ' + response.reference);
           
@@ -60,7 +69,7 @@
             premiumSince: firebase.firestore.FieldValue.serverTimestamp()
           })
           .then(() => {
-            alert("You are now Premium 🎉");
+            alert("Welcome to BlazeBond Premium 🎉");
             window.location.href = "profile.html";
           })
           .catch(err => {

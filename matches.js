@@ -1,4 +1,3 @@
-
 // 🛡️ Check if user is logged in
 auth.onAuthStateChanged(user => {
   if (!user) {
@@ -27,12 +26,17 @@ auth.onAuthStateChanged(user => {
         if (doc.id === user.uid) return;
 
         const matchDiv = document.createElement("div");
-        matchDiv.classList.add("match");
+        matchDiv.classList.add("match-card");
 
         matchDiv.innerHTML = `
-          <h3>${data.username} ${data.is18Verified ? '🔞✅' : ''}</h3>
+          <div class="match-header">
+            <h3>${data.username} ${data.is18Verified ? '🔞✅' : ''} ${data.isPremium ? '💎' : ''}</h3>
+          </div>
           <p>Email: ${data.email}</p>
-          <button onclick="window.location.href='chat.html?uid=${doc.id}'">Chat</button>
+          <div class="match-actions">
+            <button onclick="window.location.href='chat.html?uid=${doc.id}'">💬 Chat</button>
+            <button onclick="window.location.href='profile.html?uid=${doc.id}'">👤 View Profile</button>
+          </div>
         `;
         matchesContainer.appendChild(matchDiv);
       });
@@ -42,3 +46,4 @@ auth.onAuthStateChanged(user => {
       alert("Failed to load matches.");
     });
 });
+

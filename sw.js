@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bondly-v1';
+const CACHE_NAME = 'blazebond-v1';
 const ASSETS = [
   '/',
   '/index.html',
@@ -25,12 +25,21 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => cache.addAll(ASSETS))
+      .catch(error => {
+        console.error('Failed to cache assets:', error);
+      })
   );
 });
 
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
-      .then(response => response || fetch(event.request))
+      .then(response => {
+        // Return cached response, or fetch from network if not cached
+        return response || fetch(event.request);
+      })
+      .catch(error => {
+        console.error('Fetch failed:', error);
+      })
   );
 });
