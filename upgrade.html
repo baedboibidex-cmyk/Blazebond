@@ -1,43 +1,90 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Upgrade to Premium 💳</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blazebond Premium 💎</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      color: #e6e6e6;
+      text-align: center;
+      padding: 50px;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    h2 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      color: #fff;
+    }
+    p {
+      font-size: 1.2em;
+      margin-bottom: 30px;
+      color: #b8b8b8;
+    }
+    button {
+      background: linear-gradient(90deg, #ff7e5f, #feb47b);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      font-size: 1.1em;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+  </style>
 </head>
 <body>
 
-<h2>Premium Access</h2>
-<p>Unlock games & special features</p>
+  <h2>Blazebond Premium 💎</h2>
+  <p>Unlock exclusive games & special features</p>
 
-<button onclick="upgrade()">Upgrade (Test)</button>
+  <button onclick="upgrade()">Upgrade (Test Mode)</button>
 
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-<script src="firebase.js"></script>
-<script src="navbar.js"></script>
-<script>
-auth.onAuthStateChanged(user => {
-  if (!user) {
-    window.location.href = "index.html";
-  }
-});
+  <script src="firebase.js"></script>
+  <script src="navbar.js"></script>
+  <script>
+    // Ensure user is logged in
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = "index.html";
+      }
+    });
 
-function upgrade(){
-  const user = auth.currentUser;
-  if(!user) return;
+    // Upgrade function
+    function upgrade() {
+      const user = auth.currentUser;
+      if (!user) return;
 
-  // 💳 TEST MODE ONLY
-  db.collection("users").doc(user.uid).update({
-    isPremium: true
-  }).then(() => {
-    alert("Premium activated 🎉");
-    window.location.href = "games.html";
-  });
-}
-</script>
+      // Update user's premium status in Firestore
+      db.collection("users").doc(user.uid).update({
+        isPremium: true,
+        premiumSince: new Date()
+      }).then(() => {
+        alert("Blazebond Premium activated! Enjoy exclusive features. 🎉");
+        window.location.href = "games.html";
+      }).catch(error => {
+        alert("Error: " + error.message);
+      });
+    }
+  </script>
 
 </body>
 </html>
